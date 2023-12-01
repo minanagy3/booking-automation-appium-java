@@ -4,6 +4,7 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 import io.appium.java_client.pagefactory.iOSXCUITFindBy;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -19,6 +20,8 @@ public class ReservationPage {
     @iOSXCUITFindBy(accessibility = "Hotel name")
     private WebElement hotelNameElement;
 
+    private static final String HOTEL_NAME_XPATH = "//*[contains(text(), 'Tolip Hotel Alexandria')]";
+
     public ReservationPage(AppiumDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
@@ -27,7 +30,7 @@ public class ReservationPage {
 
     public void waitForPageLoad() {
         wait.until(ExpectedConditions.presenceOfElementLocated(
-            org.openqa.selenium.By.xpath("//*[contains(@text, 'Tolip Hotel Alexandria')]")
+            By.xpath(HOTEL_NAME_XPATH)
         ));
         try {
             Thread.sleep(2000);
@@ -40,10 +43,10 @@ public class ReservationPage {
         try {
             return hotelNameElement.getText();
         } catch (Exception e) {
-            // Try alternative selector
-            return driver.findElement(
-                org.openqa.selenium.By.xpath("//*[contains(@text, 'Tolip Hotel Alexandria')]")
-            ).getText();
+            WebElement hotelNameEl = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath(HOTEL_NAME_XPATH)
+            ));
+            return hotelNameEl.getText();
         }
     }
 
@@ -52,4 +55,3 @@ public class ReservationPage {
         return hotelName.contains(expectedName);
     }
 }
-

@@ -17,15 +17,15 @@ public class HomePage {
     private AppiumDriver driver;
     private WebDriverWait wait;
 
-    @AndroidFindBy(id = "com.booking:id/search_box_text")
-    @iOSXCUITFindBy(accessibility = "Search destination")
+    @AndroidFindBy(id = "com.booking:id/search_box")
+    @iOSXCUITFindBy(accessibility = "Search")
     private WebElement searchInput;
 
-    @AndroidFindBy(id = "com.booking:id/check_in_date")
+    @AndroidFindBy(xpath = "//android.widget.Button[@content-desc='Check-in date']")
     @iOSXCUITFindBy(accessibility = "Check-in date")
     private WebElement checkInDateButton;
 
-    @AndroidFindBy(id = "com.booking:id/check_out_date")
+    @AndroidFindBy(xpath = "//android.widget.Button[@content-desc='Check-out date']")
     @iOSXCUITFindBy(accessibility = "Check-out date")
     private WebElement checkOutDateButton;
 
@@ -33,9 +33,11 @@ public class HomePage {
     @iOSXCUITFindBy(accessibility = "Search")
     private WebElement searchButton;
 
-    @AndroidFindBy(id = "com.booking:id/accept_cookies")
-    @iOSXCUITFindBy(accessibility = "Accept")
-    private WebElement acceptCookiesButton;
+    // For mobile web browser
+    private static final String SEARCH_INPUT_CSS = "input[name='ss']";
+    private static final String CHECK_IN_DATE_CSS = "button[data-testid='date-display-field-start']";
+    private static final String CHECK_OUT_DATE_CSS = "button[data-testid='date-display-field-end']";
+    private static final String SEARCH_BUTTON_CSS = "button[type='submit']";
 
     public HomePage(AppiumDriver driver) {
         this.driver = driver;
@@ -44,11 +46,14 @@ public class HomePage {
     }
 
     public void navigate() {
-        // App is already launched by Appium
+        driver.get("https://www.booking.com");
         // Handle cookies popup if it appears
         try {
-            if (acceptCookiesButton.isDisplayed()) {
-                acceptCookiesButton.click();
+            WebElement acceptCookies = driver.findElement(
+                org.openqa.selenium.By.id("onetrust-accept-btn-handler")
+            );
+            if (acceptCookies.isDisplayed()) {
+                acceptCookies.click();
             }
         } catch (Exception e) {
             // Cookies popup might not appear
@@ -56,51 +61,73 @@ public class HomePage {
     }
 
     public void searchLocation(String location) {
-        wait.until(ExpectedConditions.visibilityOf(searchInput));
-        searchInput.clear();
-        searchInput.sendKeys(location);
+        try {
+            // Try mobile app locators first
+            wait.until(ExpectedConditions.visibilityOf(searchInput));
+            searchInput.clear();
+            searchInput.sendKeys(location);
+        } catch (Exception e) {
+            // Fallback to mobile web locators
+            WebElement searchField = driver.findElement(
+                org.openqa.selenium.By.cssSelector(SEARCH_INPUT_CSS)
+            );
+            wait.until(ExpectedConditions.visibilityOf(searchField));
+            searchField.clear();
+            searchField.sendKeys(location);
+        }
+        
         try {
             Thread.sleep(1000); // Wait for autocomplete
-            // Select first suggestion
-            driver.findElement(org.openqa.selenium.By.xpath("//android.widget.TextView[contains(@text, '" + location + "')]")).click();
-        } catch (Exception e) {
-            // Try alternative approach
-            searchInput.sendKeys(org.openqa.selenium.Keys.ENTER);
+            // For mobile, use touch actions or direct key events
+            org.openqa.selenium.interactions.Actions actions = 
+                new org.openqa.selenium.interactions.Actions(driver);
+            actions.sendKeys(org.openqa.selenium.Keys.ARROW_DOWN).perform();
+            Thread.sleep(500);
+            actions.sendKeys(org.openqa.selenium.Keys.ENTER).perform();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 
     public void selectCheckInDate(LocalDate date) {
-        checkInDateButton.click();
+        try {
+            checkInDateButton.click();
+        } catch (Exception e) {
+            WebElement checkInBtn = driver.findElement(
+                org.openqa.selenium.By.cssSelector(CHECK_IN_DATE_CSS)
+            );
+            checkInBtn.click();
+        }
+        
         String dateString = formatDateForBooking(date);
-        // Navigate to the date in calendar
-        selectDateInCalendar(date);
+        WebElement dateElement = driver.findElement(
+            org.openqa.selenium.By.cssSelector("span[data-date='" + dateString + "']")
+        );
+        wait.until(ExpectedConditions.elementToBeClickable(dateElement)).click();
     }
 
     public void selectCheckOutDate(LocalDate date) {
-        selectDateInCalendar(date);
+        String dateString = formatDateForBooking(date);
+        WebElement dateElement = driver.findElement(
+            org.openqa.selenium.By.cssSelector("span[data-date='" + dateString + "']")
+        );
+        wait.until(ExpectedConditions.elementToBeClickable(dateElement)).click();
     }
 
-    private void selectDateInCalendar(LocalDate date) {
-        // Mobile calendar selection logic
-        int day = date.getDayOfMonth();
-        String dayXpath = "//android.widget.TextView[@text='" + day + "']";
+    public void clickSearch() {
         try {
-            driver.findElement(org.openqa.selenium.By.xpath(dayXpath)).click();
+            searchButton.click();
         } catch (Exception e) {
-            // Alternative selector
-            driver.findElement(org.openqa.selenium.By.xpath("//*[@text='" + day + "']")).click();
+            WebElement searchBtn = driver.findElement(
+                org.openqa.selenium.By.cssSelector(SEARCH_BUTTON_CSS)
+            );
+            searchBtn.click();
         }
+        wait.until(ExpectedConditions.urlContains("searchresults"));
     }
 
     private String formatDateForBooking(LocalDate date) {
         return date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    }
-
-    public void clickSearch() {
-        searchButton.click();
-        wait.until(ExpectedConditions.presenceOfElementLocated(
-            org.openqa.selenium.By.id("com.booking:id/search_results")
-        ));
     }
 
     public void searchHotel(String location, LocalDate checkIn, LocalDate checkOut) {
@@ -110,4 +137,3 @@ public class HomePage {
         clickSearch();
     }
 }
-

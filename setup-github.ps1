@@ -16,7 +16,7 @@ $headers = @{
 
 $body = @{
     name = $repoName
-    description = "Booking.com mobile automation tests using Appium, TestNG, and Java"
+    description = "Booking.com mobile automation tests using Appium, Selenium WebDriver, TestNG, and Java"
     private = $false
 } | ConvertTo-Json
 
@@ -37,4 +37,3 @@ try {
     Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "You may need to create the repository manually on GitHub.com" -ForegroundColor Yellow
 }
-

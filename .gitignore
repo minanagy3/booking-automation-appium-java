@@ -38,12 +38,10 @@ build/
 test-output/
 surefire-reports/
 
-### Appium ###
-*.apk
-*.ipa
-appium.log
-
 ### OS ###
 .DS_Store
 Thumbs.db
 
+### Appium ###
+*.apk
+*.ipa

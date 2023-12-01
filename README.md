@@ -1,15 +1,14 @@
 # Booking.com Mobile Automation Tests - Appium Java
 
-This project contains automated mobile tests for Booking.com using Appium, TestNG, Maven, and Page Object Model (POM) design pattern.
+This project contains automated mobile tests for Booking.com using Appium, Selenium WebDriver, TestNG, Maven, and Page Object Model (POM) design pattern.
 
 ## 📋 Requirements
 
 - Java 11 or higher
 - Maven 3.6 or higher
-- Appium Server (latest version)
+- Appium Server 2.0 or higher
 - Android SDK (for Android testing) or Xcode (for iOS testing)
-- Android Emulator or iOS Simulator / Real Device
-- Booking.com mobile app installed on device/emulator
+- Chrome browser installed on mobile device/emulator
 
 ## 🚀 Setup
 
@@ -17,9 +16,10 @@ This project contains automated mobile tests for Booking.com using Appium, TestN
 
 ```bash
 npm install -g appium
-npm install -g @appium/doctor
-appium doctor
+npm install -g appium-doctor
 ```
+
+Or download Appium Desktop from: https://github.com/appium/appium-desktop/releases
 
 ### 2. Install Appium Drivers
 
@@ -34,18 +34,19 @@ appium driver install xcuitest      # For iOS
 appium
 ```
 
-### 4. Setup Android Emulator/Device
+Or start Appium Desktop GUI application.
 
-- Start Android Emulator or connect physical device
-- Enable USB debugging
-- Verify device is connected: `adb devices`
+### 4. Setup Android Emulator or iOS Simulator
 
-### 5. Install Booking.com App
+**For Android:**
+- Create an Android Virtual Device (AVD) using Android Studio
+- Or connect a physical Android device via USB with USB debugging enabled
 
-- Download Booking.com APK (Android) or install from App Store (iOS)
-- Install on device/emulator
+**For iOS:**
+- Use Xcode Simulator
+- Or connect a physical iOS device
 
-### 6. Clone and Setup Project
+### 5. Clone and Setup Project
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/booking-automation-appium-java.git
@@ -53,13 +54,13 @@ cd booking-automation-appium-java
 mvn clean install
 ```
 
-### 7. Create Excel Test Data
+### 6. Create Excel Test Data
 
 ```bash
 mvn exec:java -Dexec.mainClass="com.booking.utils.CreateExcelData" -Dexec.classpathScope=test
 ```
 
-Or manually create `data/test-data.xlsx` with:
+Or manually create `data/test-data.xlsx` with the following structure:
 - Column A: Location (e.g., "Alexandria")
 - Column B: CheckInDate (format: DD/MM/YYYY)
 - Column C: CheckOutDate (format: DD/MM/YYYY)
@@ -73,22 +74,21 @@ booking-automation-appium-java/
 │       ├── java/
 │       │   └── com/
 │       │       └── booking/
-│       │           ├── base/              # Base test class
-│       │           │   └── BaseTest.java
-│       │           ├── pages/             # Page Object Model classes
+│       │           ├── pages/          # Page Object Model classes
 │       │           │   ├── HomePage.java
 │       │           │   ├── SearchResultsPage.java
 │       │           │   ├── HotelDetailsPage.java
 │       │           │   └── ReservationPage.java
-│       │           ├── tests/             # Test classes
+│       │           ├── tests/          # Test classes
 │       │           │   └── BookingFlowTest.java
-│       │           └── utils/             # Utility classes
+│       │           └── utils/           # Utility classes
+│       │               ├── AppiumDriverManager.java
 │       │               ├── ExcelDataProvider.java
 │       │               ├── DateHelper.java
 │       │               └── CreateExcelData.java
 │       └── resources/
-│           └── appium.properties
-├── data/                                  # Test data files
+│           └── testng.xml
+├── data/                               # Test data files
 │   └── test-data.xlsx
 ├── pom.xml
 ├── testng.xml
@@ -100,7 +100,7 @@ booking-automation-appium-java/
 The project includes the following test cases:
 
 1. **Complete booking flow** - End-to-end test covering:
-   - Opening Booking.com app
+   - Opening booking.com in mobile browser
    - Searching for Alexandria location
    - Selecting check-in (1 week from today) and check-out (4 days after check-in) dates
    - Finding and selecting Tolip Hotel Alexandria
@@ -111,108 +111,80 @@ The project includes the following test cases:
 
 3. **Verify hotel name in reservation page** - Asserts that "Tolip Hotel Alexandria" is shown in the reservation page.
 
+## 📊 Test Data
+
+Test data is stored in `data/test-data.xlsx` with the following columns:
+- **Location**: Search location (e.g., "Alexandria")
+- **CheckInDate**: Check-in date (format: DD/MM/YYYY)
+- **CheckOutDate**: Check-out date (format: DD/MM/YYYY)
+
+If dates are not provided in Excel, the system will automatically calculate:
+- Check-in: 1 week from today
+- Check-out: 4 days after check-in
+
 ## 🏃 Running Tests
 
-### Update testng.xml with your device details:
-
-Edit `testng.xml` and update:
-- `deviceName`: Your device/emulator name (check with `adb devices`)
-- `platformVersion`: Your Android/iOS version
-- `appPackage`: Booking.com app package name
-- `appActivity`: Booking.com app main activity
-- `appiumServerUrl`: Appium server URL (default: http://localhost:4723/wd/hub)
-
 ### Run all tests:
-
 ```bash
 mvn test
 ```
 
 ### Run specific test class:
-
 ```bash
 mvn test -Dtest=BookingFlowTest
 ```
 
 ### Run with TestNG XML:
-
 ```bash
 mvn test -DsuiteXmlFile=testng.xml
 ```
 
 ### Run in IDE:
-
 - Right-click on `testng.xml` → Run As → TestNG Suite
 - Or right-click on `BookingFlowTest.java` → Run As → TestNG Test
 
-## 📱 Mobile-Specific Features
+## ⚙️ Configuration
 
-- ✅ Appium Java Client 8.5.0
-- ✅ Support for both Android and iOS
-- ✅ Page Object Model with Appium PageFactory
-- ✅ Touch actions for scrolling and gestures
-- ✅ Mobile-specific locators (ID, Accessibility ID, XPath)
+### Change Platform (Android/iOS)
+
+Edit `BookingFlowTest.java`:
+```java
+private String platform = "android"; // Change to "ios" for iOS testing
+```
+
+### Appium Server URL
+
+Edit `AppiumDriverManager.java` if your Appium server is running on a different port:
+```java
+private static final String APPIUM_SERVER_URL = "http://127.0.0.1:4723";
+```
+
+### Device Capabilities
+
+Edit `AppiumDriverManager.java` to customize device capabilities:
+- Platform version
+- Device name
+- Browser name
+- Automation name
+
+## 🎯 Features
+
+- ✅ Page Object Model (POM) design pattern
 - ✅ Excel data provider using Apache POI
+- ✅ TestNG for test execution and reporting
+- ✅ Support for both Android and iOS
+- ✅ Mobile web browser automation
 - ✅ Automatic date calculation
-
-## 🔧 Configuration
-
-### Android Configuration
-
-In `testng.xml`:
-```xml
-<parameter name="platform" value="android"/>
-<parameter name="deviceName" value="emulator-5554"/>
-<parameter name="platformVersion" value="11.0"/>
-<parameter name="appPackage" value="com.booking"/>
-<parameter name="appActivity" value="com.booking.ui.activities.SplashActivity"/>
-```
-
-### iOS Configuration
-
-In `testng.xml`:
-```xml
-<parameter name="platform" value="ios"/>
-<parameter name="deviceName" value="iPhone 13"/>
-<parameter name="platformVersion" value="15.0"/>
-<parameter name="appPackage" value="com.booking.iphone"/>
-```
-
-### Finding App Package and Activity
-
-**Android:**
-```bash
-adb shell pm list packages | grep booking
-adb shell dumpsys window windows | grep -E 'mCurrentFocus'
-```
-
-**iOS:**
-- Check Bundle ID in Xcode or App Store Connect
+- ✅ Comprehensive test coverage
+- ✅ Maven project structure
 
 ## 📝 Notes
 
-- The tests use mobile-specific selectors that may need adjustment based on the actual app
-- Appium server must be running before executing tests
-- Device/emulator must be connected and unlocked
-- App must be installed on the device/emulator
-- Selectors are examples and may need to be updated based on the actual app structure
-
-## 🐛 Troubleshooting
-
-### Appium Connection Issues
-- Verify Appium server is running: `appium --version`
-- Check server URL in testng.xml
-- Ensure device is connected: `adb devices` (Android)
-
-### Element Not Found
-- Use Appium Inspector to find correct selectors
-- Update selectors in Page Object classes
-- Add appropriate waits
-
-### App Not Launching
-- Verify app package and activity names
-- Ensure app is installed on device
-- Check app permissions
+- The tests handle dynamic content and may need selector adjustments based on Booking.com's UI changes
+- Cookies popup is automatically handled
+- Tests include proper waits and error handling
+- Supports both native app locators and mobile web locators
+- Make sure Appium server is running before executing tests
 
 ## 📦 Dependencies
 
@@ -220,6 +192,19 @@ adb shell dumpsys window windows | grep -E 'mCurrentFocus'
 - **Selenium WebDriver** 4.15.0
 - **TestNG** 7.8.0
 - **Apache POI** 5.2.4 (for Excel)
+- **WebDriverManager** 5.6.2 (for driver management)
+
+## 🔧 Troubleshooting
+
+### Appium Connection Issues
+- Ensure Appium server is running on port 4723
+- Check device/emulator is connected and visible: `adb devices` (Android) or `xcrun simctl list` (iOS)
+- Verify Appium drivers are installed: `appium driver list`
+
+### Test Execution Issues
+- Ensure Chrome browser is installed on the device/emulator
+- Check device capabilities match your device/emulator
+- Verify network connectivity for web testing
 
 ## 📄 License
 
@@ -228,4 +213,3 @@ ISC
 ## 👤 Author
 
 Junior QA Engineer
-

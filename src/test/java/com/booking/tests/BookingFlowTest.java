@@ -1,14 +1,16 @@
 package com.booking.tests;
 
-import com.booking.base.BaseTest;
 import com.booking.pages.*;
+import com.booking.utils.AppiumDriverManager;
 import com.booking.utils.ExcelDataProvider;
 import com.booking.utils.DateHelper;
+import io.appium.java_client.AppiumDriver;
 import org.testng.annotations.*;
 import java.io.File;
 import java.time.LocalDate;
 
-public class BookingFlowTest extends BaseTest {
+public class BookingFlowTest {
+    private AppiumDriver driver;
     private HomePage homePage;
     private SearchResultsPage searchResultsPage;
     private HotelDetailsPage hotelDetailsPage;
@@ -16,6 +18,13 @@ public class BookingFlowTest extends BaseTest {
     private ExcelDataProvider.TestData testData;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
+    private String platform = "android"; // Change to "ios" for iOS testing
+
+    @BeforeClass
+    public void setUp() throws Exception {
+        // Setup Appium Driver
+        driver = AppiumDriverManager.getDriver(platform);
+    }
 
     @BeforeMethod
     public void loadTestData() {
@@ -55,7 +64,7 @@ public class BookingFlowTest extends BaseTest {
 
     @Test(priority = 1, description = "Complete booking flow - Search, Select Hotel, and Reserve")
     public void testCompleteBookingFlow() {
-        // Step 1: Navigate to app
+        // Step 1: Navigate to booking.com
         homePage.navigate();
 
         // Step 2: Search for location, select dates, and click search
@@ -137,5 +146,14 @@ public class BookingFlowTest extends BaseTest {
             "Hotel name should contain 'Tolip Hotel Alexandria'"
         );
     }
-}
 
+    @AfterMethod
+    public void tearDownMethod() {
+        // Optional: Take screenshot on failure
+    }
+
+    @AfterClass
+    public void tearDown() {
+        AppiumDriverManager.quitDriver();
+    }
+}

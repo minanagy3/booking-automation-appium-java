@@ -11,16 +11,17 @@
     <packaging>jar</packaging>
 
     <name>Booking.com Mobile Automation Tests</name>
-    <description>Booking.com mobile automation tests using Appium, TestNG, and Java</description>
+    <description>Booking.com mobile automation tests using Appium, Selenium WebDriver, TestNG, and Java</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <selenium.version>4.15.0</selenium.version>
         <appium.version>8.5.0</appium.version>
         <testng.version>7.8.0</testng.version>
         <poi.version>5.2.4</poi.version>
-        <selenium.version>4.15.0</selenium.version>
+        <webdrivermanager.version>5.6.2</webdrivermanager.version>
     </properties>
 
     <dependencies>
@@ -31,7 +32,7 @@
             <version>${appium.version}</version>
         </dependency>
 
-        <!-- Selenium WebDriver (required by Appium) -->
+        <!-- Selenium WebDriver -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
@@ -55,6 +56,13 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${poi.version}</version>
+        </dependency>
+
+        <!-- WebDriverManager -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${webdrivermanager.version}</version>
         </dependency>
 
         <!-- Logging -->
@@ -94,4 +102,3 @@
         </plugins>
     </build>
 </project>
-
