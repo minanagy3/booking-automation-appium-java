@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Booking.com Mobile Automation Test Suite" parallel="methods" thread-count="1">
+    <test name="Booking Flow Tests - Android">
+        <parameter name="platform" value="android"/>
+        <parameter name="deviceName" value="emulator-5554"/>
+        <parameter name="platformVersion" value="11.0"/>
+        <parameter name="appPackage" value="com.booking"/>
+        <parameter name="appActivity" value="com.booking.ui.activities.SplashActivity"/>
+        <parameter name="appiumServerUrl" value="http://localhost:4723/wd/hub"/>
+        <classes>
+            <class name="com.booking.tests.BookingFlowTest">
+                <methods>
+                    <include name="testCompleteBookingFlow"/>
+                    <include name="testVerifyDatesInDetailsPage"/>
+                    <include name="testVerifyHotelNameInReservationPage"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    
+    <!-- Uncomment for iOS testing
+    <test name="Booking Flow Tests - iOS">
+        <parameter name="platform" value="ios"/>
+        <parameter name="deviceName" value="iPhone 13"/>
+        <parameter name="platformVersion" value="15.0"/>
+        <parameter name="appPackage" value="com.booking.iphone"/>
+        <parameter name="appActivity" value=""/>
+        <parameter name="appiumServerUrl" value="http://localhost:4723/wd/hub"/>
+        <classes>
+            <class name="com.booking.tests.BookingFlowTest">
+                <methods>
+                    <include name="testCompleteBookingFlow"/>
+                    <include name="testVerifyDatesInDetailsPage"/>
+                    <include name="testVerifyHotelNameInReservationPage"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+    -->
+</suite>
+
